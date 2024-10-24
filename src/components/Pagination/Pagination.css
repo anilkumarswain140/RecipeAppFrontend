@@ -1,0 +1,32 @@
+.pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center; /* Center the pagination */
+    padding: 10px;          /* Add some padding */
+  }
+  
+  .pagination button {
+    background-color: #007bff; /* Bootstrap primary color */
+    color: white;              /* White text */
+    border: none;              /* No border */
+    border-radius: 4px;       /* Rounded corners */
+    padding: 8px 12px;        /* Padding for button */
+    margin: 0 5px;            /* Space between buttons */
+    cursor: pointer;           /* Pointer cursor on hover */
+    transition: background-color 0.3s; /* Smooth transition for hover effect */
+  }
+  
+  .pagination button:hover:not(:disabled) {
+    background-color: #0056b3; /* Darker shade on hover */
+  }
+  
+  .pagination button:disabled {
+    background-color: #cccccc; /* Grey background for disabled button */
+    cursor: not-allowed;        /* Not allowed cursor */
+  }
+  
+  .pagination .active {
+    background-color: #0056b3; /* Active page button color */
+    font-weight: bold;         /* Bold text for active page */
+  }
+  
