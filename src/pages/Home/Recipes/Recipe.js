@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import StarRating from "../../../components/Ratings/StarRating";
-
+import './Recipe.css';
 const RecipeCard = ({ id,title, ingredients, image, rating, authorName, preparationTime }) => {
     return (
         <Link to={`/recipedetails/${id}`}>
@@ -12,7 +12,7 @@ const RecipeCard = ({ id,title, ingredients, image, rating, authorName, preparat
                     {/* Left column - Title, ingredients, and rating */}
                     <div className="p-4">
                         <h2 className="text-lg font-bold">{title}</h2>
-                        <p>Preparation Time <span>{preparationTime}</span></p>
+                        <p className="prep-time">Preparation Time <span>{preparationTime} mins</span></p>
                         <StarRating rating={rating} />
                     </div>
 
