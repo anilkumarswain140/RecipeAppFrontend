@@ -14,3 +14,12 @@
         z-index: 1;
     }
 }
+
+@media (min-width: 1653px) {
+    .add-recipe-btn {
+        height: 6%;
+        top: 75%;
+        padding: 3px 23px;
+        font-size: 17px;
+    }
+}
