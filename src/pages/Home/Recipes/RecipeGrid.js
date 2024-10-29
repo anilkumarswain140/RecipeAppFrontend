@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import RecipeCard from './Recipe';
+import RecipeCard from './Recipe/Recipe';
 import { useSelector, useDispatch } from 'react-redux';
 import { addRecipe, fetchRecipes } from '../../../store/reducers/recipeSlice';
 import AddRecipeButton from '../../../components/AddRecipe/addRecipeButton';
 import RecipeFilter from '../../../components/Filter/Filter';
 import Pagination from '../../../components/Pagination/Pagination';
-
+import './RecipeGrid.css';
 
 const RecipeGrid = () => {
   const dispatch = useDispatch();
@@ -48,7 +48,7 @@ const RecipeGrid = () => {
       {/* Pass handleFilterChange to RecipeFilter */}
       <RecipeFilter onFilterChange={handleFilterChange} />
 
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 p-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 p-4 recipe-content">
         {recipes.map((recipe, index) => (
           <RecipeCard
             key={index}

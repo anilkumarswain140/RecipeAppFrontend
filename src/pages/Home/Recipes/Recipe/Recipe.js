@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import StarRating from "../../../components/Ratings/StarRating";
+import StarRating from "../../../../components/Ratings/StarRating";
 import './Recipe.css';
 const RecipeCard = ({ id,title, ingredients, image, rating, authorName, preparationTime }) => {
     return (

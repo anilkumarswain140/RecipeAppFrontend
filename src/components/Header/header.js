@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { logout } from '../../store/reducers/userSlice';
 import { fetchRecipes } from '../../store/reducers/recipeSlice';
@@ -52,7 +52,7 @@ const Header = () => {
   return (
     <header className="bg-cyan-500 shadow">
       <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
-        <h1 className="text-2xl font-bold text-white">Recipe Market</h1>
+        <h1 className="text-2xl font-bold text-white"><Link to={'/home'}>Recipe Market</Link></h1>
 
         <div className="flex items-center space-x-4">
           <input
