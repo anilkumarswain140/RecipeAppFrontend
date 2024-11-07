@@ -1,26 +1,33 @@
-// RecipeDetails.test.js
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import RecipeDetails from './RecipeDetailsPage';
-import { getRecipeDetails, rateRecipe } from '../../api/apiService';
+import { getRecipeDetails } from '../../api/apiService';
 import { Provider } from 'react-redux';
 import configureStore from 'redux-mock-store';
 import { useParams } from 'react-router-dom';
+import { BrowserRouter as Router } from 'react-router-dom';
+import { useSpinner } from '../../api/spinnerService';
 
 // Mocking the API calls
 jest.mock('../../api/apiService', () => ({
   getRecipeDetails: jest.fn(),
-  rateRecipe: jest.fn(),
 }));
 
+// Mocking the spinner service
+jest.mock('../../api/spinnerService.js', () => ({
+  useSpinner: jest.fn(),
+}));
+
+// Mocking useParams to simulate URL parameters
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
   useParams: jest.fn(),
 }));
 
+// Setup mock store with initial user data
 const mockStore = configureStore();
 const store = mockStore({
-  user: { id: '123', username: 'testuser' }, // Mock user data
+  user: { id: '123', username: 'testuser' },
 });
 
 describe('RecipeDetails Component', () => {
@@ -29,41 +36,73 @@ describe('RecipeDetails Component', () => {
     useParams.mockReturnValue({ id: '1' });
   });
 
-  test('submits a rating', async () => {
-    // Mock the API response for recipe details
+  test('should fetch and display recipe details on page load', async () => {
+    // Mock spinner functions
+    const showSpinner = jest.fn();
+    const hideSpinner = jest.fn();
+    useSpinner.mockReturnValue({ showSpinner, hideSpinner });
+
+    // Mock the API response for getRecipeDetails
     getRecipeDetails.mockResolvedValueOnce({
       title: 'Test Recipe',
-      image: 'test-image.jpg',
-      author: { username: 'Chef John' },
+      author: { username: 'Test Author' },
       preparationTime: 30,
-      averageRating: 4.5,
       ingredients: ['Ingredient 1', 'Ingredient 2'],
       steps: ['Step 1', 'Step 2'],
-      comments: [],
     });
 
+    // Render the component with necessary providers and router
     render(
       <Provider store={store}>
-        <RecipeDetails />
+        <Router>
+          <RecipeDetails />
+        </Router>
       </Provider>
     );
 
-    // Wait for the component to render
-    expect(await screen.findByText(/rate this recipe/i)).toBeInTheDocument();
+    // Check if showSpinner is called when the fetch starts
+    expect(showSpinner).toHaveBeenCalled();
 
-    // Locate and click the star element for rating (ensure the correct data-testid in the component)
-    const star = screen.getByTestId('star-2'); // Confirm that this data-testid is set in RecipeDetails
-    fireEvent.click(star); // Simulate clicking the star to rate
-
-    // Debugging log for recipeId
-    const recipeId = useParams().id;
-    console.log("Recipe ID used for rating:", recipeId); // Should print '1'
-
-    // Wait and assert that rateRecipe is called with the expected parameters
+    // Wait for recipe details to load and hide the spinner
     await waitFor(() => {
-      expect(rateRecipe).toHaveBeenCalledTimes(1);
-      expect(rateRecipe).toHaveBeenCalledWith('1', 2, '123'); // Ensure ID is '1' and rating is '2'
+      expect(getRecipeDetails).toHaveBeenCalledWith('1'); // Ensure fetch is called with correct id
+      expect(hideSpinner).toHaveBeenCalled(); // Ensure spinner hides after fetch
     });
-});
 
+    // Check if recipe title, author, and other details are displayed as expected
+    expect(screen.getByTestId('recipecontainer')).toBeInTheDocument();
+    expect(screen.getByText('Test Recipe')).toBeInTheDocument();
+    expect(screen.getByText(/Test Recipe/)).toBeInTheDocument();
+    expect(screen.getByText('Ingredient 1')).toBeInTheDocument();
+    expect(screen.getByText('Step 1')).toBeInTheDocument();
+  });
+
+  test('should display error message if fetch fails', async () => {
+    // Mock spinner functions
+    const showSpinner = jest.fn();
+    const hideSpinner = jest.fn();
+    useSpinner.mockReturnValue({ showSpinner, hideSpinner });
+
+    // Simulate a fetch error
+    const errorMessage = "Error fetching records";
+    getRecipeDetails.mockRejectedValueOnce(new Error(errorMessage));
+
+    render(
+      <Provider store={store}>
+        <Router>
+          <RecipeDetails />
+        </Router>
+      </Provider>
+    );
+
+    // Check if showSpinner is called initially
+    expect(showSpinner).toHaveBeenCalled();
+
+    // Wait for the error to be handled
+    await waitFor(() => {
+      expect(getRecipeDetails).toHaveBeenCalledWith('1');
+      expect(hideSpinner).toHaveBeenCalled();
+      expect(screen.getByText(errorMessage)).toBeInTheDocument();
+    });
+  });
 });

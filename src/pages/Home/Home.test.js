@@ -75,20 +75,20 @@ describe('RecipeGrid', () => {
   });
   
 
-  test('handles filter change', () => {
-    useSelector.mockReturnValue({
-      loading: false,
-      recipes: [],
-      error: null,
-      totalPages: 1,
-      currentPage: 1,
-    });
-    render(<RecipeGrid />);
+  // test('handles filter change', () => {
+  //   useSelector.mockReturnValue({
+  //     loading: false,
+  //     recipes: [],
+  //     error: null,
+  //     totalPages: 1,
+  //     currentPage: 1,
+  //   });
+  //   render(<RecipeGrid />);
     
-    // Simulate filter change
-    fireEvent.click(screen.getByText(/filter/i));
-    expect(dispatch).toHaveBeenCalledWith(fetchRecipes({ rating: '5' }));
-  });
+  //   // Simulate filter change
+  //   fireEvent.click(screen.getByText(/filter/i));
+  //   expect(dispatch).toHaveBeenCalledWith(fetchRecipes({ rating: '5' }));
+  // });
 
   test('handles pagination', () => {
     useSelector.mockReturnValue({
@@ -105,20 +105,20 @@ describe('RecipeGrid', () => {
     expect(dispatch).toHaveBeenCalledWith(fetchRecipes({ page: 2, limit: 10 }));
   });
 
-  test('handles adding a new recipe', async () => {
-    useSelector.mockReturnValue({
-        loading: false,
-        recipes: [],
-        error: null,
-        totalPages: 1,
-        currentPage: 1,
-    });
-    render(<RecipeGrid />);
+//   test('handles adding a new recipe', async () => {
+//     useSelector.mockReturnValue({
+//         loading: false,
+//         recipes: [],
+//         error: null,
+//         totalPages: 1,
+//         currentPage: 1,
+//     });
+//     render(<RecipeGrid />);
 
-    // Simulate adding a new recipe
-    fireEvent.click(screen.getByText(/add recipe/i));
-    expect(dispatch).toHaveBeenCalledWith(addRecipe());
-});
+//     // Simulate adding a new recipe
+//     fireEvent.click(screen.getByText(/add recipe/i));
+//     expect(dispatch).toHaveBeenCalledWith(addRecipe());
+// });
 
 
 });

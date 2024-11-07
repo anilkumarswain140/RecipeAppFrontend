@@ -1,114 +1,145 @@
-import { render, screen, fireEvent } from '@testing-library/react';
-import { BrowserRouter as Router } from 'react-router-dom'; // To handle Link components
-import SignUp from './SingUp';
-import useSignUp from '../../hooks/useSignUp'; // Mock the custom hook
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import SignUp from './SingUp'; // Adjust the path if needed
+import { BrowserRouter as Router } from 'react-router-dom';
+import useSignUp from '../../hooks/useSignUp'; // Mock this hook
 
-// Mock the useSignUp hook
-jest.mock('../../hooks/useSignUp.js');
+jest.mock('../../hooks/useSignUp', () => ({
+    __esModule: true,
+    default: jest.fn(),
+}));
 
 describe('SignUp Component', () => {
-  let mockHandleSignUp, mockLoading, mockError;
+    let mockHandleSignUp;
 
-  beforeEach(() => {
-    // Mock implementation of the useSignUp hook
-    mockHandleSignUp = jest.fn();
-    mockLoading = false;
-    mockError = '';
-
-    useSignUp.mockReturnValue({
-      handleSignUp: mockHandleSignUp,
-      loading: mockLoading,
-      error: mockError,
-    });
-  });
-
-  test('should render the SignUp form correctly', () => {
-    render(
-      <Router>
-        <SignUp />
-      </Router>
-    );
-    
-    expect(screen.getByPlaceholderText('Username')).toBeInTheDocument();
-    expect(screen.getByPlaceholderText('Email Address')).toBeInTheDocument();
-    expect(screen.getByPlaceholderText('Password')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /Signup/i })).toBeInTheDocument();
-  });
-
-  test('should update form data when inputs change', () => {
-    render(
-      <Router>
-        <SignUp />
-      </Router>
-    );
-
-    const usernameInput = screen.getByPlaceholderText('Username');
-    const emailInput = screen.getByPlaceholderText('Email Address');
-    const passwordInput = screen.getByPlaceholderText('Password');
-
-    fireEvent.change(usernameInput, { target: { value: 'testuser' } });
-    fireEvent.change(emailInput, { target: { value: 'testuser@example.com' } });
-    fireEvent.change(passwordInput, { target: { value: 'password123' } });
-
-    expect(usernameInput.value).toBe('testuser');
-    expect(emailInput.value).toBe('testuser@example.com');
-    expect(passwordInput.value).toBe('password123');
-  });
-
-  test('should call handleSignUp with form data on form submission', () => {
-    render(
-      <Router>
-        <SignUp />
-      </Router>
-    );
-
-    const usernameInput = screen.getByPlaceholderText('Username');
-    const emailInput = screen.getByPlaceholderText('Email Address');
-    const passwordInput = screen.getByPlaceholderText('Password');
-    const signUpButton = screen.getByRole('button', { name: /Signup/i });
-
-    fireEvent.change(usernameInput, { target: { value: 'testuser' } });
-    fireEvent.change(emailInput, { target: { value: 'testuser@example.com' } });
-    fireEvent.change(passwordInput, { target: { value: 'password123' } });
-    fireEvent.click(signUpButton);
-
-    expect(mockHandleSignUp).toHaveBeenCalledWith({
-      username: 'testuser',
-      email: 'testuser@example.com',
-      password: 'password123',
-    });
-  });
-
-  test('should display an error message when there is an error', () => {
-    useSignUp.mockReturnValue({
-      handleSignUp: mockHandleSignUp,
-      loading: false,
-      error: 'Signup failed',
+    beforeEach(() => {
+        mockHandleSignUp = jest.fn();
+        useSignUp.mockReturnValue({
+            handleSignUp: mockHandleSignUp,
+            loading: false,
+            error: '',
+        });
     });
 
-    render(
-      <Router>
-        <SignUp />
-      </Router>
-    );
+    test('renders SignUp form correctly', () => {
+        render(
+            <Router>
+                <SignUp />
+            </Router>
+        );
 
-    expect(screen.getByText('Signup failed')).toBeInTheDocument();
-  });
-
-  test('should disable the signup button when loading', () => {
-    useSignUp.mockReturnValue({
-      handleSignUp: mockHandleSignUp,
-      loading: true,
-      error: '',
+        expect(screen.getByPlaceholderText('Username')).toBeInTheDocument();
+        expect(screen.getByPlaceholderText('Email Address')).toBeInTheDocument();
+        expect(screen.getByPlaceholderText('Password')).toBeInTheDocument();
+        expect(screen.getByText('Signup')).toBeInTheDocument();
     });
 
-    render(
-      <Router>
-        <SignUp />
-      </Router>
-    );
+    test('calls handleSignUp with correct data on form submission', async () => {
+        render(
+            <Router>
+                <SignUp />
+            </Router>
+        );
 
-    const signUpButton = screen.getByRole('button', { name: /Signup/i });
-    expect(signUpButton).toBeDisabled();
-  });
+        fireEvent.change(screen.getByPlaceholderText('Username'), { target: { value: 'testuser' } });
+        fireEvent.change(screen.getByPlaceholderText('Email Address'), { target: { value: 'testuser@example.com' } });
+        fireEvent.change(screen.getByPlaceholderText('Password'), { target: { value: 'Password@123' } });
+
+        fireEvent.click(screen.getByText('Signup'));
+
+        await waitFor(() => {
+            expect(mockHandleSignUp).toHaveBeenCalledWith({
+                username: 'testuser',
+                email: 'testuser@example.com',
+                password: 'Password@123',
+            });
+        });
+    });
+
+    test('displays error message for invalid email format', async () => {
+        render(
+            <Router>
+                <SignUp />
+            </Router>
+        );
+
+        fireEvent.change(screen.getByPlaceholderText('Username'), { target: { value: 'testuser' } });
+        fireEvent.change(screen.getByPlaceholderText('Email Address'), { target: { value: 'invalidemail' } });
+        fireEvent.change(screen.getByPlaceholderText('Password'), { target: { value: 'Password@123' } });
+
+        fireEvent.click(screen.getByText('Signup'));
+
+        await waitFor(() => {
+            expect(screen.getByText('Invalid email format')).toBeInTheDocument();
+        });
+    });
+
+    test('displays error message when password does not meet requirements', async () => {
+        render(
+            <Router>
+                <SignUp />
+            </Router>
+        );
+
+        fireEvent.change(screen.getByPlaceholderText('Username'), { target: { value: 'testuser' } });
+        fireEvent.change(screen.getByPlaceholderText('Email Address'), { target: { value: 'testuser@example.com' } });
+        fireEvent.change(screen.getByPlaceholderText('Password'), { target: { value: 'short' } });
+
+        fireEvent.click(screen.getByText('Signup'));
+
+        await waitFor(() => {
+            expect(screen.getByText('Password must be at least 6 characters')).toBeInTheDocument();
+        });
+    });
+
+    test('disables Signup button when loading', async () => {
+        useSignUp.mockReturnValue({
+            handleSignUp: mockHandleSignUp,
+            loading: true,
+            error: '',
+        });
+
+        render(
+            <Router>
+                <SignUp />
+            </Router>
+        );
+
+        expect(screen.getByText('Signup')).toBeDisabled();
+    });
+
+    test('displays error message if there is a general error', async () => {
+        useSignUp.mockReturnValue({
+            handleSignUp: mockHandleSignUp,
+            loading: false,
+            error: 'Something went wrong',
+        });
+
+        render(
+            <Router>
+                <SignUp />
+            </Router>
+        );
+
+        fireEvent.change(screen.getByPlaceholderText('Username'), { target: { value: 'testuser' } });
+        fireEvent.change(screen.getByPlaceholderText('Email Address'), { target: { value: 'testuser@example.com' } });
+        fireEvent.change(screen.getByPlaceholderText('Password'), { target: { value: 'Password@123' } });
+
+        fireEvent.click(screen.getByText('Signup'));
+
+        await waitFor(() => {
+            expect(screen.getByText('Something went wrong')).toBeInTheDocument();
+        });
+    });
+
+    test('navigates to login page when the link is clicked', () => {
+        render(
+            <Router>
+                <SignUp />
+            </Router>
+        );
+
+        fireEvent.click(screen.getByText(/Login/i));
+
+        expect(window.location.pathname).toBe('/login');
+    });
 });

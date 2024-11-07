@@ -23,7 +23,6 @@ const RecipeDetails = () => {
                 showSpinner();
                 const response = await getRecipeDetails(id);
                 setRecipe(response);
-                console.log(recipe);
                 hideSpinner();
             } catch (error) {
                 hideSpinner();
@@ -35,7 +34,7 @@ const RecipeDetails = () => {
     }, [id])
     const user = useSelector((state) => state.user);
     const handleRatingChange = async (recipeId, newRating) => {
-        console.log(`Recipe ID: ${recipeId}, New Rating: ${newRating}`);
+        // console.log(`Recipe ID: ${recipeId}, New Rating: ${newRating}`);
         // showSpinner();
         try {
             showSpinner();
@@ -64,7 +63,7 @@ const RecipeDetails = () => {
         window.location.reload();
     }
     return (
-        <div className="recipe-details-container">
+        <div className="recipe-details-container" data-testid="recipecontainer">
             {error && <p className="text-red-500 font-semibold mt-2">{error}</p>}
             {showToast && <Toast message={toastMessage} onClose={() => setShowToast(false)} />} {/* Show toast if active */}
 
