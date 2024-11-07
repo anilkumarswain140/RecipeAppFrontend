@@ -4,22 +4,26 @@ import { useDispatch } from 'react-redux';
 import { logout } from '../../store/reducers/userSlice';
 import { fetchRecipes } from '../../store/reducers/recipeSlice';
 import { debounce } from 'lodash';
+import { useSpinner } from '../../api/spinnerService';
 
 const Header = () => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const { showSpinner, hideSpinner } = useSpinner();
 
   const toggleDropdown = () => {
     setDropdownOpen(!dropdownOpen);
   };
 
-  const handleLogout = () => {
+  const handleLogout = async() => {
+    showSpinner();
     console.log('User logged out');
     localStorage.removeItem('authToken');
     setDropdownOpen(false);
-    dispatch(logout());
+    await dispatch(logout());
+    hideSpinner();
     navigate('/');
   };
 

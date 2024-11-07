@@ -20,6 +20,30 @@ api.interceptors.request.use(
     }
 );
 
+
+// response interceptor
+api.interceptors.response.use(
+    (response) => response,
+    (error) => {
+        // Check if it's a server error or unauthorized error, etc.
+        if (error.response) {
+            const status = error.response.status;
+            if (status === 401) {
+                // Handle unauthorized errors (e.g., redirect to login or show alert)
+                alert("Session expired. Please log in again.");
+            } else if (status >= 500) {
+                // Handle server errors
+                alert("Something went wrong on our end. Please try again later.");
+            }
+        } else {
+            // Handle network errors or unknown issues
+            alert("Network error. Please check your connection.");
+        }
+
+        return Promise.reject(error);
+    }
+);
+
 // Function for user sign up
 export const signUpUser = async (formData) => {
     try {
@@ -27,7 +51,8 @@ export const signUpUser = async (formData) => {
         return response.data;
     } catch (error) {
         console.error('Error during signup:', error);
-        throw error;
+        const message = error.response?.data?.message || "Error during signup";
+        throw new Error(message);
     }
 };
 
@@ -38,7 +63,8 @@ export const login = async (formData) => {
         return response;
     } catch (error) {
         console.error('Error during login');
-        throw error;
+        const message = error.response?.data?.message || error.message || "Error during login";
+        throw new Error(message);
     }
 }
 
@@ -48,12 +74,12 @@ export const getRecipes = async (params = {}) => {
         // Construct the query string from the params object
         const queryString = new URLSearchParams(params).toString();
         const response = await api.get(`recipes?${queryString}`);
-
         console.log(response);
         return response.data;
     } catch (error) {
         console.error('Error fetching Recipes:', error);
-        throw error;
+        const message = error.response?.data?.message || error.message || "Error fetching Recipes";
+        throw new Error(message);
     }
 };
 
@@ -64,8 +90,8 @@ export const createRecipe = async (recipe) => {
         console.log(response);
         return response.data;
     } catch (error) {
-        console.error('Error creating recipe:', error);
-        throw error;
+        const message = error.response?.data?.message || error.message || "Error creating recipe";
+        throw new Error(message);
     }
 };
 
@@ -77,7 +103,8 @@ export const getRecipeDetails = async (recipeId) => {
         return response.data;
     } catch (error) {
         console.error('Error fetching Recipes:', error);
-        throw error;
+        const message = error.response?.data?.message || "Error fetching Recipes";
+        throw new Error(message);
     }
 };
 
@@ -94,7 +121,8 @@ export const rateRecipe = async (recipeId, newRating, userId) =>{
         return response;
     }catch(error){
         console.error("Something wrong");
-        throw error;
+        const message = error.response?.data?.message || "Something wrong please try again";
+        throw new Error(message);
     }
 }
 
@@ -109,6 +137,7 @@ export const addComment = async (recipeId, comment) =>{
         return response;
     }catch(error){
         console.error("Something wrong");
-        throw error;
+        const message = error.response?.data?.message || "Something wrong please try again";
+        throw new Error(message);
     }
 }

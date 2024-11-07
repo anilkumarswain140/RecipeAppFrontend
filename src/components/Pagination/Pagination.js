@@ -2,8 +2,6 @@ import React from 'react';
 import './Pagination.css';
 const Pagination = ({ totalPages, currentPage, onPageChange }) => {
   const handlePageChange = (page) => {
-    console.log(currentPage);
-    
     onPageChange(page); // Call the function to change the page
   };
 

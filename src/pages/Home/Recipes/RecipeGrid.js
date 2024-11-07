@@ -10,7 +10,6 @@ import './RecipeGrid.css';
 const RecipeGrid = () => {
   const dispatch = useDispatch();
   const { recipes, loading, error, totalPages, currentPage } = useSelector((state) => state.recipes);
-
   // State to hold filter criteria
   const [filter, setFilter] = useState({ rating: '', preparationTime: '' });
 
@@ -21,8 +20,6 @@ const RecipeGrid = () => {
       dispatch(fetchRecipes(filter)); // Search recipes based on filter
     } else {
       dispatch(fetchRecipes({ page: currentPage, limit: 10 })); // Fetch all recipes when there's no filter
-    console.log(totalPages);
-
     }
   }, [dispatch, filter]);
 
@@ -45,6 +42,7 @@ const RecipeGrid = () => {
 
   return (
     <div className="relative">
+      {error && <p className="text-red-500 font-semibold mt-2">{error}</p>}
       {/* Pass handleFilterChange to RecipeFilter */}
       <RecipeFilter onFilterChange={handleFilterChange} />
 

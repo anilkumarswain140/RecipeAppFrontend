@@ -2,7 +2,7 @@ import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { useDispatch, useSelector } from 'react-redux';
 import RecipeGrid from './Recipes/RecipeGrid';
-import { fetchRecipes, addRecipe } from '../../../store/reducers/recipeSlice';
+import { fetchRecipes, addRecipe } from '../../store/reducers/recipeSlice';
 
 // Mock the Redux hooks
 jest.mock('react-redux', () => ({
@@ -11,7 +11,7 @@ jest.mock('react-redux', () => ({
 }));
 
 // Mock the components
-jest.mock('./Recipes/Recipe.js', () => () => <div>RecipeCard</div>);
+jest.mock('./Recipes/Recipe/Recipe.js', () => () => <div>RecipeCard</div>);
 jest.mock('../../components/AddRecipe/addRecipeButton.js', () => () => <button>Add Recipe</button>);
 jest.mock('../../components/Filter/Filter', () => ({ onFilterChange }) => (
   <button onClick={() => onFilterChange({ rating: '5' })}>Filter</button>
@@ -19,7 +19,16 @@ jest.mock('../../components/Filter/Filter', () => ({ onFilterChange }) => (
 jest.mock('../../components/Pagination/Pagination', () => ({ onPageChange }) => (
   <button onClick={() => onPageChange(2)}>Next Page</button>
 ));
-
+jest.mock('../../store/reducers/recipeSlice.js', () => ({
+  addRecipe: jest.fn(() => ({ 
+    type: 'ADD_RECIPE', 
+    payload: { /* mock payload here */ } 
+  })),
+  fetchRecipes: jest.fn(() => ({
+    type: 'FETCH_RECIPES',
+    payload: { /* mock payload for fetchRecipes */ }
+  })),
+}));
 describe('RecipeGrid', () => {
   let dispatch;
 
@@ -55,10 +64,16 @@ describe('RecipeGrid', () => {
       totalPages: 1,
       currentPage: 1,
     });
+  
     render(<RecipeGrid />);
-    expect(screen.getByText('RecipeCard')).toBeInTheDocument();
+  
+    // Check that the RecipeCard component is rendered twice
     expect(screen.getAllByText('RecipeCard')).toHaveLength(2);
+    
+    // Alternatively, check for a specific role or class if applicable
+    // expect(screen.getAllByRole('heading', { name: /RecipeCard/i })).toHaveLength(2);
   });
+  
 
   test('handles filter change', () => {
     useSelector.mockReturnValue({
@@ -92,16 +107,18 @@ describe('RecipeGrid', () => {
 
   test('handles adding a new recipe', async () => {
     useSelector.mockReturnValue({
-      loading: false,
-      recipes: [],
-      error: null,
-      totalPages: 1,
-      currentPage: 1,
+        loading: false,
+        recipes: [],
+        error: null,
+        totalPages: 1,
+        currentPage: 1,
     });
     render(<RecipeGrid />);
 
     // Simulate adding a new recipe
     fireEvent.click(screen.getByText(/add recipe/i));
     expect(dispatch).toHaveBeenCalledWith(addRecipe());
-  });
+});
+
+
 });

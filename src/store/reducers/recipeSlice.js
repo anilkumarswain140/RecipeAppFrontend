@@ -2,15 +2,29 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { getRecipes, createRecipe } from '../../api/apiService'; // Import your API service functions
 
 // Fetch recipes from the API
-export const fetchRecipes = createAsyncThunk('recipes/fetchRecipes', async (search) => {
-    const response = await getRecipes(search); // Fetch the list of recipes
-    return response; // Assuming it returns an array of recipes
-});
+export const fetchRecipes = createAsyncThunk(
+    'recipes/fetchRecipes',
+    async (search, { rejectWithValue }) => {
+        try {
+            const response = await getRecipes(search);
+            return response;
+        } catch (error) {
+            return rejectWithValue(error.message);
+        }
+    }
+);
 
 // Add a new recipe to the API
-export const addRecipe = createAsyncThunk('recipes/addRecipe', async (newRecipe) => {
-    await createRecipe(newRecipe); // Call your API function to add the recipe
-    return newRecipe; // Return the new recipe (this can also be adjusted based on your API response)
+export const addRecipe = createAsyncThunk('recipes/addRecipe', async (newRecipe, { rejectWithValue }) => {
+    try {
+        const response = await createRecipe(newRecipe); // Call the API function to add the recipe
+        return response;
+    } catch (error) {
+        // Handle the error, extract message if possible
+        const message = error.response?.data?.message || error.message || 'Failed to add recipe';
+        console.error('Error in addRecipe:', message);
+        return rejectWithValue(message); // Return the error message to be used in the Redux slice
+    }
 });
 
 const recipeSlice = createSlice({
@@ -35,9 +49,9 @@ const recipeSlice = createSlice({
                 state.currentPage = action.payload.currentPage;
                 state.totalPages = action.payload.totalPages;
             })
-            .addCase(fetchRecipes.rejected, (state) => {
+            .addCase(fetchRecipes.rejected, (state,action) => {
                 state.loading = false;
-                state.error = 'Failed to fetch recipes';
+                state.error = action.payload || 'Failed to fetch recipes';
             })
             .addCase(addRecipe.pending, (state) => {
                 state.loading = true;
@@ -50,7 +64,7 @@ const recipeSlice = createSlice({
                 state.loading = false;
                 state.error = 'Failed to add recipe';
             })
-            
+
     },
 });
 

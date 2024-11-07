@@ -7,21 +7,28 @@ import { useSelector } from 'react-redux';
 import Toast from '../../components/Notification/Notification';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUser } from '@fortawesome/free-solid-svg-icons';
+import { useSpinner } from '../../api/spinnerService';
+
 const RecipeDetails = () => {
     const [recipe, setRecipe] = useState(null);
     const [toastMessage, setToastMessage] = useState('');
     const [showToast, setShowToast] = useState(false);
     const [comment, setComment] = useState('');
     const { id } = useParams();
+    const [error, setError] = useState('');
+    const { showSpinner, hideSpinner } = useSpinner();
     useEffect(() => {
         const fetchRecipe = async () => {
             try {
+                showSpinner();
                 const response = await getRecipeDetails(id);
                 setRecipe(response);
                 console.log(recipe);
-
+                hideSpinner();
             } catch (error) {
+                hideSpinner();
                 console.error("error fetching records");
+                setError(error.message || "error fetching records");
             }
         }
         fetchRecipe();
@@ -29,14 +36,19 @@ const RecipeDetails = () => {
     const user = useSelector((state) => state.user);
     const handleRatingChange = async (recipeId, newRating) => {
         console.log(`Recipe ID: ${recipeId}, New Rating: ${newRating}`);
+        // showSpinner();
         try {
+            showSpinner();
             const response = await rateRecipe(recipeId, newRating, user?.id);
             setToastMessage('Rating added successfully!');
             setShowToast(true); // Show toast
             setTimeout(() => setShowToast(false), 3000);
+            hideSpinner();
             return response;
         } catch (error) {
+            hideSpinner();
             console.error('Error submitting rating:', error);
+
         }
     };
 
@@ -46,12 +58,16 @@ const RecipeDetails = () => {
     }
 
     const handleSubmit = async () => {
+        showSpinner();
         await addComment(id, comment, user?.id);
+        hideSpinner();
         window.location.reload();
     }
     return (
         <div className="recipe-details-container">
+            {error && <p className="text-red-500 font-semibold mt-2">{error}</p>}
             {showToast && <Toast message={toastMessage} onClose={() => setShowToast(false)} />} {/* Show toast if active */}
+
             {/* Recipe Image */}
             <div className="recipe-header">
                 <img

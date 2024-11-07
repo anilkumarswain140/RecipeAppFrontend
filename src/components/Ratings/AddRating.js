@@ -28,6 +28,7 @@ const Rating = ({ initialRating = 0, onRatingChange, isEditable = false }) => {
     <div className="rating">
       {[1, 2, 3, 4, 5].map((star) => (
         <span
+          data-testid={`star-${star}`}
           key={star}
           className={`star ${star <= (hoverRating || rating) ? 'filled' : ''}`}
           onClick={() => handleClick(star)}
